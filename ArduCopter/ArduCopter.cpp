@@ -206,6 +206,8 @@ void Copter::setup()
 
     // initialise the main loop scheduler
     scheduler.init(&scheduler_tasks[0], ARRAY_SIZE(scheduler_tasks), MASK_LOG_PM);
+
+    gcs().send_text(MAV_SEVERITY_INFO, "Hello world! It's a customized firmware :)");
 }
 
 void Copter::loop()
