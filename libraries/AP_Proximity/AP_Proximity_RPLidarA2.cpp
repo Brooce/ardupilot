@@ -34,8 +34,9 @@
 #include <GCS_MAVLink/GCS.h>
 
 
+#define RP_DBG_PIN_ENABLED 0
+#define RP_DBG_MSG_ENABLED 0
 
-#define RP_DEBUG_ENABLED 0
 /*
  * DEBUGGING MACROS
  *
@@ -48,7 +49,7 @@
  * - Use "Debug_gcs_ts"/"Debug_uart_ts" versions to append timestamp.
  * WARNING! Sending too much data creates significant delays (especially via UART)!
  */
-#if RP_DEBUG_ENABLED
+#if RP_DBG_MSG_ENABLED
 /* Redirect debug messages to whatever output is needed */
   #define Debug(level, fmt, args ...)  Debug_gcs(level, fmt, ## args); Debug_uart(level, fmt, ## args);
 
@@ -61,6 +62,16 @@
   #define Debug_uart_ts(level, fmt, args ...)  do { if ((level)&DBG_UART) { printf( "%dms/RPL: " fmt "\n", AP_HAL::millis(), ## args); } } while (0)
 #else
   #define Debug(level, fmt, args ...)
+#endif
+
+#if RP_DBG_PIN_ENABLED
+#define DBG_INIT(x)         hal.gpio->pinMode(x,HAL_GPIO_OUTPUT);
+#define DBG_HIGH(x)         hal.gpio->write(x,1);
+#define DBG_LOW(x)          hal.gpio->write(x,0);
+#else
+#define DBG_INIT(x)
+#define DBG_HIGH(x)
+#define DBG_LOW(x)
 #endif
 
 
@@ -124,6 +135,9 @@ void AP_Proximity_RPLidarA2::update(void)
         return;
     }
 
+    DBG_INIT(50);
+    DBG_HIGH(50);
+
     // read parameters
     if (_forward_direction != frontend.get_yaw_correction(state.instance)) {
         Debug(DBG_GCS|DBG_UART, "new forward direction received (%d io %d)", frontend.get_yaw_correction(state.instance), _forward_direction);
@@ -147,6 +161,8 @@ void AP_Proximity_RPLidarA2::update(void)
         set_status(AP_Proximity::Proximity_Good);
         Debug(0, "data ok");
     }
+
+    DBG_LOW(50);
 }
 
 // get maximum distance (in meters) of sensor
