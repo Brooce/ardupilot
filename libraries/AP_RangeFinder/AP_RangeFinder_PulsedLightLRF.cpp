@@ -92,9 +92,10 @@ void AP_RangeFinder_PulsedLightLRF::timer(void)
         // read the high and low byte distance registers
         if (_dev->read_registers(LL40LS_DISTHIGH_REG | LL40LS_AUTO_INCREMENT, (uint8_t*)&val, sizeof(val))) {
             uint16_t _distance_cm = be16toh(val);
+            float offset  = state.offset;
             // remove momentary spikes
             if (abs(_distance_cm - last_distance_cm) < 100) {
-                state.distance_cm = _distance_cm;
+                state.distance_cm = _distance_cm - offset;
                 state.last_reading_ms = AP_HAL::millis();
                 update_status();                
             }
